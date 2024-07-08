@@ -1,60 +1,53 @@
 package com.example.dem1.controller;
 import com.example.dem1.model.Content;
+import java.util.Optional;
 
-import com.example.dem1.repository.ContentRepository;
+import com.example.dem1.repository.ContentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/content")
 public class ContentController {
 
-    private final ContentRepository repository;
-
-
     @Autowired
-    public ContentController(ContentRepository repository) {
-            this.repository = repository;
-        }
+    private ContentService contentService;
 
-
-    // Method to handle GET requests to "/api/content"
     @GetMapping("")
     public List<Content> getAllContent(){
-        return repository.findAll();
+        return contentService.getContent();
     }
 
-
-    // Method to handle GET requests to "/api/content/{id}"
-    @GetMapping("/{id}")
-    public Content getContentbyId(@PathVariable Integer id) {
-        return repository.findById(Long.valueOf(id)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found"));
+    @GetMapping("/id/{id}")
+    public Content getContentById(@PathVariable Integer id) {
+        return contentService.getContentById(Long.valueOf(id));
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
+    @GetMapping("/title/{title}")
+    public Optional<Content> getContentByTitle(@PathVariable String title) {
+        return contentService.getContentByTitle(title);
+    }
+
     @PostMapping("")
-    public void addContent(@RequestBody Content content) {
-        repository.save(content);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Content addContent(@RequestBody Content content) {
+        return contentService.saveContent(content);
     }
 
+
+    @PutMapping("/id/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PutMapping("/{id}")
-    public void updateContent(@RequestBody Content content, @PathVariable Integer id){
-        if(!repository.existsById(Long.valueOf(id))) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found");
-        }
-        content.setId(Long.valueOf(id));
-        repository.save(content);
+    public Content updateContent(@RequestBody Content content, @PathVariable Integer id){
+        return contentService.updateContent(content, id);
     }
 
+
+    @DeleteMapping("/id/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}")
     public void deleteContentById(@PathVariable Integer id) {
-        repository.deleteById(Long.valueOf(id));
+        contentService.deleteContentById(Long.valueOf(id));
     }
 }
