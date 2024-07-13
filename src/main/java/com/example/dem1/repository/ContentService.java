@@ -42,7 +42,9 @@ public class ContentService {
     }
 
     public void deleteContentById(Long id) {
-        repository.deleteById(id);
+        if(!repository.existsById(Long.valueOf(id))) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Content not found");
+        }repository.deleteById(id);
     }
 
 }
